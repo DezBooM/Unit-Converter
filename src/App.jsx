@@ -1,38 +1,45 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Form from "./components/Form"
 import Results from "./components/Results"
 
 function App() {
-  const [input, setInput] = useState("")
-  const [length, setLength] = useState("")
-  const [volume, setVolume] = useState("")
-  const [mass, setMass] = useState("")
+  const [input, setInput] = useState(0)
+  const [metric, setMetric] = useState(true)
+  const [length, setLength] = useState(null)
+  const [volume, setVolume] = useState(null)
+  const [mass, setMass] = useState(null)
 
-  const getResults = (name1, name2, input, unit1, unit2) => {
-    const total1 = Number(input) * unit1
-    const total2 = Number(input) * unit2
-    const result = `
-      ${input} ${name1} = ${total1.toFixed(3)} ${name2} |
-      ${input} ${name2} = ${total2.toFixed(3)} ${name1}`
-    return result
+  const getMetric = () => {
+    setLength({unit:"ft", value: (input * 3.28084).toFixed(3) })
+    setVolume({unit:"gal", value: (input * 0.264172052).toFixed(3) })
+    setMass({unit:"lb", value: (input * 2.20462262).toFixed(3) })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setLength(getResults("meters", "feet", input, 3.281, 0.305))
-    setVolume(getResults("liters", "gallons", input, 0.264, 3.785))
-    setMass(getResults("kilos", "pounds", input, 2.204, 0.454))
+  const getImperial = () => {
+    setLength({unit:"m", value: (input * 0.3048).toFixed(3) })
+    setVolume({unit:"L", value: (input * 3.78541178).toFixed(3) })
+    setMass({unit:"kg", value: (input * 0.45359237).toFixed(3) })
   }
+
+  useEffect(() => {
+    metric ? getMetric() : getImperial()
+  }, [input, metric])
 
   return (
     <div className="h-screen md:h-full lg:h-screen flex sm:justify-center items-center bg-gradient-to-br from-indigo-900 to-indigo-700">
-      <div className="bg-transparent mx-2 w-full sm:w-4/5 lg:w-2/5 h-3/5 shadow-lg shadow-black rounded-lg text-white">
-        <h1 className="text-center text-3xl mt-4 font-bold">Unit Converter</h1>
-        <Form input={input} setInput={setInput} handleSubmit={handleSubmit} />
+      <div className="bg-transparent mx-2 w-full sm:w-4/5 lg:w-2/5 h-3/5 shadow-lg shadow-black rounded-lg text-white text-center">
+        <h1 className="text-3xl mt-4 font-bold">Unit Converter</h1>
+        <p>{metric ? "Metric -> Imperial" : "Imperial -> Metric"}</p>
+        <Form
+          input={input}
+          setInput={setInput}
+          metric={metric}
+          setMetric={setMetric}
+        />
         <div className="text-center">
-          <Results title="Length" result={length} />
-          <Results title="Volume" result={volume} />
-          <Results title="Mass" result={mass} />
+          <Results title="Length" {...length} />
+          <Results title="Volume" {...volume} />
+          <Results title="Mass" {...mass} />
         </div>
       </div>
     </div>
